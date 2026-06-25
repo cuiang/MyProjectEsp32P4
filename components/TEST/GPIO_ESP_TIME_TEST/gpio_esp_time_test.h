@@ -14,10 +14,15 @@
 #include "freertos/FreeRTOS.h"                                                                      // FreeRTOS库
 #include "freertos/task.h"                                                                          // FreeRTOS库：用于任务管理
 
-//========ESP-IDF库==================================
+//========自定义的库==================================
 #include "mcu_gpio_setup.h"                                                                         // 引入GPIO定义库
 #include "esp_time_framework.h"                                                                     // 引入自定义ESP_TIME库
 #include "gpio_level_switch.h"                                                                      // GPIO引脚控制
+#include "base_function.h"                                                                          // 引入自定义基础函数库
+
+// 设置 TAG 的名称：为这份文件的文件名
+#define FILENAME __FILE__                                                                           // 获取这个文件的文件名（含路径）
+#define TAG (FILENAME + (strlen(FILENAME) - strlen(strrchr(FILENAME, '/' ) + 1)))                   // 把 TAG 设置为当前文件的文件名（不含路径）
 
 /**
  * @brief 输出PWM测试

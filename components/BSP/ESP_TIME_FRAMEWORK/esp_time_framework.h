@@ -4,6 +4,13 @@
  * @version     V1.0
  * @date        2026-06-17
  * @brief       ESP_TIME定时器
+ * @note        目标频率	代入公式	精度	档位数
+ * @note         20kHz	   20000/200   100%	    1
+ * @note         10kHz	   10000/200	50%	    2
+ * @note          5kHz	    5000/200	25%	    4
+ * @note          1kHz	    1000/200	 5%	   20
+ * @note         200Hz	     200/200	 1%	  100
+ * @note         100Hz	     100/200   0.5%	  200
  ****************************************************************************************************
  */
 
@@ -40,6 +47,7 @@ typedef enum {
     PIN_STATE_PAUSED_LOW,                                                                           // 暂停输出，强制维持低电平
     PIN_STATE_PAUSED_HIGH,                                                                          // 暂停输出，强制维持高电平
     PIN_STATE_PAUSED_HOLD,                                                                          // 暂停输出，保持当前电平不变
+    PIN_STATE_NOT_INIT,                                                                             // 引脚未初始化
 } pin_state_t;
 
 // 单个 GPIO 引脚的配置与状态结构体（每个引脚独立维护自己的状态）
@@ -48,6 +56,7 @@ typedef struct {
     uint32_t duty_percent;                                                                          // 占空比百分比 (0 ~ 100)
     pin_state_t state;                                                                              // 当前引脚状态（活跃/暂停）
     uint32_t pulse_target;                                                                          // 目标脉冲数量 (0 表示无限输出，>0 表示输出指定次数后暂停)
+    uint8_t phase_invert;                                                                           // 相位偏移控制（0 正常相位， 1 反相/差分相位）
     uint32_t pulse_count;                                                                           // 当前已输出的脉冲计数
     pin_state_t post_state;                                                                         // 脉冲输出完成后的暂停状态（低/高/保持）
     int64_t error_accumulator;                                                                      // 用于误差扩散算法
@@ -64,6 +73,13 @@ typedef struct {
     gpio_binding_t *bindings;                                                                       // 指向绑定的 GPIO 数组的指针
     uint8_t bind_count;                                                                             // 绑定的 GPIO 数量
 } generic_timer_task_t;
+
+// 批量更新参数结构体
+typedef struct {
+    gpio_num_t gpio_num;      // 目标引脚
+    uint32_t new_duty_percent; // 新的占空比
+    uint32_t new_pulse_target; // 新的总周期数 (0 表示无限)
+} pin_update_t;
 
 // --- 静态函数声明 ---
 static void timer_callback(void *arg);
@@ -116,4 +132,54 @@ return_value framework_pin_pause(generic_timer_task_t *task, gpio_num_t gpio_num
  */
 return_value framework_timer_destroy(generic_timer_task_t *task, pin_state_t final_state) ;
 
+/**
+ * @brief 询问引脚PWM总周期数（目标脉冲数）
+ * @param *task : 定时器任务指针
+ * @param gpio_num : GPIO引脚编号
+ * @return int32_t : 返回目标脉冲数 (>0), 0 表示无限循环, -1 表示引脚未找到
+ */
+int32_t framework_pin_get_pulse_target(generic_timer_task_t *task, gpio_num_t gpio_num);
+
+/**
+ * @brief 询问引脚PWM剩余周期数
+ * @param *task : 定时器任务指针
+ * @param gpio_num : GPIO引脚编号
+ * @return int32_t : 返回剩余脉冲数, 0 表示无限循环或已完成, -1 表示引脚未找到
+ */
+int32_t framework_pin_get_remaining_pulses(generic_timer_task_t *task, gpio_num_t gpio_num);
+
+/**
+ * @brief 询问引脚PWM占空比
+ * @param *task : 定时器任务指针
+ * @param gpio_num : GPIO引脚编号
+ * @return int32_t : 返回占空比 (0-100), -1 表示引脚未找到
+ */
+int32_t framework_pin_get_duty(generic_timer_task_t *task, gpio_num_t gpio_num);
+
+/**
+ * @brief 询问引脚的逻辑状态（如：活跃、暂停低、暂停高）
+ * @param *task : 定时器任务指针
+ * @param gpio_num : GPIO引脚编号
+ * @return pin_state_t : 返回状态枚举，如果未找到引脚，返回 -1
+ */
+pin_state_t  framework_pin_get_state(generic_timer_task_t *task, gpio_num_t gpio_num);
+
+/**
+ * @brief 询问引脚当前的物理电平（高/低）
+ * @param *task : 定时器任务指针
+ * @param gpio_num : GPIO引脚编号
+ * @return pin_state_t
+ * @note 注意：此函数仅在 PIN_STATE_ACTIVE 状态下有效，它基于数学推算而非直接读取寄存器。
+ */
+pin_state_t framework_pin_get_physical_level(generic_timer_task_t *task, gpio_num_t gpio_num);
+
+/**
+ * @brief 批量修改多个引脚的占空比和总周期数
+ * @param *task : 定时器任务指针
+ * @param updates : 指向更新信息数组的指针
+ * @param update_count : 数组长度
+ * @return return_value : 错误码
+ */
+return_value framework_batch_update(generic_timer_task_t *task, const pin_update_t *updates, 
+                                   uint8_t update_count);
 #endif

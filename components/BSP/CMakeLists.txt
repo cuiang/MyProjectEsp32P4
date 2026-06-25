@@ -1,4 +1,5 @@
 set(src_dirs
+            BASE_FUNCTION
             ESP_TIME_FRAMEWORK
             GPIO_LEVEL_SWITCH
             RETURN_VALUE
@@ -6,6 +7,7 @@ set(src_dirs
    )
 
 set(include_dirs
+            BASE_FUNCTION
             ESP_TIME_FRAMEWORK
             GPIO_LEVEL_SWITCH
             RETURN_VALUE

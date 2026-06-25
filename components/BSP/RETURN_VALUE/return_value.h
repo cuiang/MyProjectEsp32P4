@@ -56,12 +56,11 @@ typedef int return_value;
 // 0xD2：ESP_TIME警告代码
 // 0xE2：ESP_TIME错误代码
 #define ERR_ESP_TIME_CREATE_INVALID_ARG             0xE201                                  /*!< ESP_TIME定时器绑定GPIO函数传入参数无效 */
-#define ERR_ESP_TIME_SET_FREQ_INVALID_ARG           0xE202                                  /*!< ESP_TIME定时器修改频率函数传入参数无效 */
+#define ERR_ESP_TIME_SET_FREQ_INVALID_ARG           0xE202                                  /*!< ESP_TIME定时器修改频率函数传入参数无效，参数值超限 */
 #define ERR_ESP_TIME_PIN_SET_DUTY_PIN_NOT_FOUND     0xE203                                  /*!< ESP_TIME定时器修改占空比，传入GPIO引脚编号无效（非绑定的引脚） */
-#define ERR_ESP_TIME_PIN_PAUSE_NVALID_ARG           0xE204                                  /*!< ESP_TIME定时器暂停引脚PWM输出函数传入参数无效，任务为空 */
+#define ERR_ESP_TIME_TASK_IS_NULL                   0xE204                                  /*!< ESP_TIME定时器传入参数无效，任务为空 */
 #define ERR_ESP_TIME_PIN_PAUSE_PIN_NOT_FOUND        0xE205                                  /*!< ESP_TIME定时器暂停引脚PWM输出函数传入GPIO引脚编号无效（非绑定的引脚） */
-#define ERR_ESP_TIME_DESTROY_NVALID_ARG             0xE206                                  /*!< ESP_TIME定时器销毁函数传入参数无效，任务为空 */
-#define ERR_ESP_TIME_START_INVALID_ARG              0xE207                                  /*!< ESP_TIME定时器启动函数传入参数无效，任务为空 */
-#define ERR_ESP_TIMER_CREATE_FAIL                   0xE208                                  /*!< ESP_TIME定时器创建失败 */
+#define ERR_ESP_TIME_SET_DUTY                       0xE206                                  /*!< ESP_TIME定时器设置占空比函数传入参数无效，参数值超限 */
+#define ERR_ESP_TIMER_CREATE_FAIL                   0xE207                                  /*!< ESP_TIME定时器创建失败 */
 
 #endif
